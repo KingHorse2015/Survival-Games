@@ -1,33 +1,29 @@
 package org.mcsg.survivalgames.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.mcsg.survivalgames.Game;
-import org.mcsg.survivalgames.MessageManager;
 import org.mcsg.survivalgames.Game.GameMode;
-import org.mcsg.survivalgames.MessageManager.PrefixType;
 import org.mcsg.survivalgames.GameManager;
+import org.mcsg.survivalgames.MessageManager;
+import org.mcsg.survivalgames.MessageManager.PrefixType;
 import org.mcsg.survivalgames.SettingsManager;
 
-
-
-public class Enable implements SubCommand{
+public class Enable implements SubCommand {
 
 	@Override
-	public boolean onCommand(Player player, String[] args) {        
-		if(!player.hasPermission(permission()) && !player.isOp()){
+	public boolean onCommand(Player player, String[] args) {
+		if (!player.hasPermission(permission()) && !player.isOp()) {
 			MessageManager.getInstance().sendFMessage(PrefixType.ERROR, "error.nopermission", player);
 			return true;
 		}
-		try{
-			if(args.length == 0){
-				for(Game g:GameManager.getInstance().getGames()){
-					if(g.getMode() == GameMode.DISABLED)
+		try {
+			if (args.length == 0) {
+				for (Game g : GameManager.getInstance().getGames()) {
+					if (g.getMode() == GameMode.DISABLED)
 						g.enable();
 				}
 				MessageManager.getInstance().sendFMessage(MessageManager.PrefixType.INFO, "game.all", player, "input-enabled");
-			}
-			else{
+			} else {
 				GameManager.getInstance().enableGame(Integer.parseInt(args[0]));
 				MessageManager.getInstance().sendFMessage(MessageManager.PrefixType.INFO, "game.state", player, "arena-" + args[0], "input-enabled");
 			}
@@ -39,7 +35,6 @@ public class Enable implements SubCommand{
 		return true;
 
 	}
-
 
 	@Override
 	public String help(Player p) {

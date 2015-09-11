@@ -7,15 +7,15 @@ import org.mcsg.survivalgames.Game;
 import org.mcsg.survivalgames.GameManager;
 import org.mcsg.survivalgames.MessageManager;
 import org.mcsg.survivalgames.MessageManager.PrefixType;
-import org.mcsg.survivalgames.logging.QueueManager;
 import org.mcsg.survivalgames.SettingsManager;
+import org.mcsg.survivalgames.logging.QueueManager;
 
-public class Reload implements SubCommand{
+public class Reload implements SubCommand {
 
 	@Override
 	public boolean onCommand(final Player player, String[] args) {
-		if(player.hasPermission(permission())){
-			if(args.length != 1){
+		if (player.hasPermission(permission())) {
+			if (args.length != 1) {
 				MessageManager.getInstance().sendMessage(PrefixType.INFO, "Valid reload types <Settings | Games |All>", player);
 				MessageManager.getInstance().sendMessage(PrefixType.INFO, "Settings will reload the settings configs and attempt to reapply them", player);
 				MessageManager.getInstance().sendMessage(PrefixType.INFO, "Games will reload all games currently running", player);
@@ -24,27 +24,25 @@ public class Reload implements SubCommand{
 				return true;
 
 			}
-			if(args[0].equalsIgnoreCase("settings")){
+			if (args[0].equalsIgnoreCase("settings")) {
 				SettingsManager.getInstance().reloadChest();
 				SettingsManager.getInstance().reloadKits();
 				SettingsManager.getInstance().reloadMessages();
 				SettingsManager.getInstance().reloadSpawns();
 				SettingsManager.getInstance().reloadSystem();
 				SettingsManager.getInstance().reloadConfig();
-				for(Game g: GameManager.getInstance().getGames()){
-					g.reloadConfig(); 
+				for (Game g : GameManager.getInstance().getGames()) {
+					g.reloadConfig();
 				}
 				MessageManager.getInstance().sendMessage(PrefixType.INFO, "Settings Reloaded", player);
-			}
-			else if(args[0].equalsIgnoreCase("games")){	
-				for(Game g:GameManager.getInstance().getGames()){
+			} else if (args[0].equalsIgnoreCase("games")) {
+				for (Game g : GameManager.getInstance().getGames()) {
 					QueueManager.getInstance().rollback(g.getID(), true);
 					g.disable();
 					g.enable();
 				}
 				MessageManager.getInstance().sendMessage(PrefixType.INFO, "Games Reloaded", player);
-			}
-			else if(args[0].equalsIgnoreCase("all")){	
+			} else if (args[0].equalsIgnoreCase("all")) {
 				final Plugin pinstance = GameManager.getInstance().getPlugin();
 				Bukkit.getPluginManager().disablePlugin(pinstance);
 				Bukkit.getPluginManager().enablePlugin(pinstance);

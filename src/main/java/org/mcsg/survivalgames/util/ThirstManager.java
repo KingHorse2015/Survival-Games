@@ -13,40 +13,40 @@ import org.mcsg.survivalgames.Game;
 import org.mcsg.survivalgames.GameManager;
 import org.mcsg.survivalgames.SurvivalGames;
 
-
 public class ThirstManager implements Listener {
-	
+
 	ThirstManager instance = new ThirstManager();
-	
+
 	public ThirstManager getInstance() {
 		return instance;
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public void startThirst() {
 		Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(new SurvivalGames(), new Runnable() {
-    	public void run() {
-    		for (Game g : GameManager.getInstance().getGames()) {
-    			for (Player p : g.getAllPlayers()) {
-    				removeThirst(p, 1);
-    			}
-    		}
-    	}
-    }, 60L, 200L);
+			@Override
+			public void run() {
+				for (Game g : GameManager.getInstance().getGames()) {
+					for (Player p : g.getAllPlayers()) {
+						removeThirst(p, 1);
+					}
+				}
+			}
+		}, 60L, 200L);
 	}
-	
+
 	public void removeThirst(Player p, int amount) {
 		p.setLevel(p.getLevel() - amount);
 	}
-	
+
 	public void addThirst(Player p, int amount) {
 		p.setLevel(p.getLevel() + amount);
 	}
-	
+
 	public void startThirst(Player p) {
 		p.setLevel(30);
 	}
-	
+
 	@EventHandler
 	public void onPlayerDrinkWater(PlayerInteractEvent e) {
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
