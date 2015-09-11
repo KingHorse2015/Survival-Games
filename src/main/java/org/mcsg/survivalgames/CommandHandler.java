@@ -32,20 +32,18 @@ import org.mcsg.survivalgames.commands.SetSpawn;
 import org.mcsg.survivalgames.commands.Spectate;
 import org.mcsg.survivalgames.commands.SubCommand;
 import org.mcsg.survivalgames.commands.Teleport;
-import org.mcsg.survivalgames.commands.Test;
 import org.mcsg.survivalgames.commands.Vote;
-
-
 
 public class CommandHandler implements CommandExecutor {
 	private Plugin plugin;
-	private HashMap < String, SubCommand > commands;
-	private HashMap < String, Integer > helpinfo;
+	private HashMap<String, SubCommand> commands;
+	private HashMap<String, Integer> helpinfo;
 	private MessageManager msgmgr = MessageManager.getInstance();
+
 	public CommandHandler(Plugin plugin) {
 		this.plugin = plugin;
-		commands = new HashMap < String, SubCommand > ();
-		helpinfo = new HashMap < String, Integer > ();
+		commands = new HashMap<String, SubCommand>();
+		helpinfo = new HashMap<String, Integer>();
 		loadCommands();
 		loadHelpInfo();
 	}
@@ -72,14 +70,16 @@ public class CommandHandler implements CommandExecutor {
 		commands.put("list", new ListPlayers());
 		commands.put("tp", new Teleport());
 		commands.put("reload", new Reload());
-//		commands.put("test", new Test());
+		// commands.put("test", new Test());
 
 		// commands.put("sponsor", new Sponsor());
 	}
 
 	private void loadHelpInfo() {
-		//you can do this by iterating thru the hashmap from a certian index btw instead of using a new hashmap,
-		//plus, instead of doing three differnet ifs, just iterate thru and check if the value == the page
+		// you can do this by iterating thru the hashmap from a certian index
+		// btw instead of using a new hashmap,
+		// plus, instead of doing three differnet ifs, just iterate thru and
+		// check if the value == the page
 		helpinfo.put("createarena", 3);
 		helpinfo.put("join", 1);
 		helpinfo.put("addwall", 3);
@@ -100,7 +100,7 @@ public class CommandHandler implements CommandExecutor {
 		helpinfo.put("list", 1);
 		commands.put("reload", new Reload());
 
-		//helpinfo.put("sponsor", 1);
+		// helpinfo.put("sponsor", 1);
 	}
 
 	@Override
@@ -132,8 +132,7 @@ public class CommandHandler implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("help")) {
 				if (args.length == 1) {
 					help(player, 1);
-				}
-				else {
+				} else {
 					if (args[1].toLowerCase().startsWith("player")) {
 						help(player, 1);
 						return true;
@@ -145,18 +144,17 @@ public class CommandHandler implements CommandExecutor {
 					if (args[1].toLowerCase().startsWith("admin")) {
 						help(player, 3);
 						return true;
-					}
-					else {
+					} else {
 						msgmgr.sendMessage(PrefixType.WARNING, args[1] + " is not a valid page! Valid pages are Player, Staff, and Admin.", player);
 					}
 				}
 				return true;
 			}
 			String sub = args[0];
-			Vector < String > l = new Vector < String > ();
+			Vector<String> l = new Vector<String>();
 			l.addAll(Arrays.asList(args));
 			l.remove(0);
-			args = (String[]) l.toArray(new String[0]);
+			args = l.toArray(new String[0]);
 			if (!commands.containsKey(sub)) {
 				msgmgr.sendMessage(PrefixType.WARNING, "Command doesn't exist.", player);
 				msgmgr.sendMessage(PrefixType.INFO, "Type /sg help for command information", player);
@@ -166,7 +164,7 @@ public class CommandHandler implements CommandExecutor {
 				commands.get(sub).onCommand(player, args);
 			} catch (Exception e) {
 				e.printStackTrace();
-				msgmgr.sendFMessage(PrefixType.ERROR, "error.command", player, "command-["+sub+"] "+Arrays.toString(args));
+				msgmgr.sendFMessage(PrefixType.ERROR, "error.command", player, "command-[" + sub + "] " + Arrays.toString(args));
 				msgmgr.sendMessage(PrefixType.INFO, "Type /sg help for command information", player);
 			}
 			return true;
@@ -174,7 +172,7 @@ public class CommandHandler implements CommandExecutor {
 		return false;
 	}
 
-	public void help (Player p, int page) {
+	public void help(Player p, int page) {
 		if (page == 1) {
 			p.sendMessage(ChatColor.BLUE + "------------ " + msgmgr.pre + ChatColor.DARK_AQUA + " Player Commands" + ChatColor.BLUE + " ------------");
 		}
@@ -186,23 +184,20 @@ public class CommandHandler implements CommandExecutor {
 		}
 
 		for (String command : commands.keySet()) {
-			try{
+			try {
 				if (helpinfo.get(command) == page) {
 
 					msgmgr.sendMessage(PrefixType.INFO, commands.get(command).help(p), p);
 				}
-			}catch(Exception e){}
+			} catch (Exception e) {
+			}
 		}
-		/*for (SubCommand v : commands.values()) {
-            if (v.permission() != null) {
-                if (p.hasPermission(v.permission())) {
-                    msgmgr.sendMessage(PrefixType.INFO1, v.help(p), p);
-                } else {
-                    msgmgr.sendMessage(PrefixType.WARNING, v.help(p), p);
-                }
-            } else {
-                msgmgr.sendMessage(PrefixType.INFO, v.help(p), p);
-            }
-        }*/
+		/*
+		 * for (SubCommand v : commands.values()) { if (v.permission() != null)
+		 * { if (p.hasPermission(v.permission())) {
+		 * msgmgr.sendMessage(PrefixType.INFO1, v.help(p), p); } else {
+		 * msgmgr.sendMessage(PrefixType.WARNING, v.help(p), p); } } else {
+		 * msgmgr.sendMessage(PrefixType.INFO, v.help(p), p); } }
+		 */
 	}
 }

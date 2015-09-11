@@ -14,11 +14,10 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.util.Vector;
 
 public class SettingsManager {
 
-	//makes the config easily accessible
+	// makes the config easily accessible
 
 	private static SettingsManager instance = new SettingsManager();
 	private static Plugin p;
@@ -28,20 +27,18 @@ public class SettingsManager {
 	private FileConfiguration messages;
 	private FileConfiguration chest;
 
+	private File f; // spawns
+	private File f2; // system
+	private File f3; // kits
+	private File f4; // messages
+	private File f5; // chest
 
-	private File f; //spawns
-	private File f2; //system
-	private File f3; //kits
-	private File f4; //messages
-	private File f5; //chest
-	
 	private static final int KIT_VERSION = 1;
 	private static final int MESSAGE_VERSION = 1;
 	private static final int CHEST_VERSION = 0;
 	private static final int SPAWN_VERSION = 0;
 	private static final int SYSTEM_VERSION = 0;
-	
-	
+
 	private SettingsManager() {
 
 	}
@@ -54,14 +51,14 @@ public class SettingsManager {
 		SettingsManager.p = p;
 		if (p.getConfig().getInt("config-version") == SurvivalGames.config_version) {
 			SurvivalGames.config_todate = true;
-		}else{
+		} else {
 			File config = new File(p.getDataFolder(), "config.yml");
 			config.delete();
 		}
-		
+
 		p.getConfig().options().copyDefaults(true);
 		p.saveDefaultConfig();
-		
+
 		f = new File(p.getDataFolder(), "spawns.yml");
 		f2 = new File(p.getDataFolder(), "system.yml");
 		f3 = new File(p.getDataFolder(), "kits.yml");
@@ -69,32 +66,35 @@ public class SettingsManager {
 		f5 = new File(p.getDataFolder(), "chest.yml");
 
 		try {
-			if (!f.exists()) 	f.createNewFile();
-			if (!f2.exists())	f2.createNewFile();
-			if (!f3.exists()) 	loadFile("kits.yml");
-			if (!f4.exists()) 	loadFile("messages.yml");
-			if (!f5.exists()) 	loadFile("chest.yml");
+			if (!f.exists())
+				f.createNewFile();
+			if (!f2.exists())
+				f2.createNewFile();
+			if (!f3.exists())
+				loadFile("kits.yml");
+			if (!f4.exists())
+				loadFile("messages.yml");
+			if (!f5.exists())
+				loadFile("chest.yml");
 
-		} 
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		reloadSystem();
 		saveSystemConfig();
-		
+
 		reloadSpawns();
 		saveSpawns();
-		
+
 		reloadKits();
-		//saveKits();
-		
+		// saveKits();
+
 		reloadChest();
-		
+
 		reloadMessages();
 		saveMessages();
-		
-		
+
 	}
 
 	public void set(String arg0, Object arg1) {
@@ -116,16 +116,15 @@ public class SettingsManager {
 	public FileConfiguration getKits() {
 		return kits;
 	}
-	
+
 	public FileConfiguration getChest() {
 		return chest;
 	}
-	
+
 	public FileConfiguration getMessageConfig() {
-		//System.out.println("asdf"+messages.getString("prefix.main"));
+		// System.out.println("asdf"+messages.getString("prefix.main"));
 		return messages;
 	}
-
 
 	public void saveConfig() {
 		// p.saveConfig();
@@ -133,38 +132,36 @@ public class SettingsManager {
 
 	public static World getGameWorld(int game) {
 		if (SettingsManager.getInstance().getSystemConfig().getString("sg-system.arenas." + game + ".world") == null) {
-			//LobbyManager.getInstance().error(true);
+			// LobbyManager.getInstance().error(true);
 			return null;
 
 		}
 		return p.getServer().getWorld(SettingsManager.getInstance().getSystemConfig().getString("sg-system.arenas." + game + ".world"));
 	}
 
-	public void reloadConfig(){
+	public void reloadConfig() {
 		p.reloadConfig();
 	}
-	
-	public boolean moveFile(File ff){
-		SurvivalGames.$("Moving outdated config file. "+f.getName());
+
+	public boolean moveFile(File ff) {
+		SurvivalGames.$("Moving outdated config file. " + f.getName());
 		String name = ff.getName();
 		File ff2 = new File(SurvivalGames.getPluginDataFolder(), getNextName(name, 0));
 		return ff.renameTo(ff2);
 	}
-	
-	public String getNextName(String name, int n){
-		File ff = new File(SurvivalGames.getPluginDataFolder(), name+".old"+n);
-		if(!ff.exists()){
+
+	public String getNextName(String name, int n) {
+		File ff = new File(SurvivalGames.getPluginDataFolder(), name + ".old" + n);
+		if (!ff.exists()) {
 			return ff.getName();
-		}
-		else{
-			return getNextName(name, n+1);
+		} else {
+			return getNextName(name, n + 1);
 		}
 	}
-	
-	
+
 	public void reloadSpawns() {
 		spawns = YamlConfiguration.loadConfiguration(f);
-		if(spawns.getInt("version", 0) != SPAWN_VERSION){
+		if (spawns.getInt("version", 0) != SPAWN_VERSION) {
 			moveFile(f);
 			reloadSpawns();
 		}
@@ -174,7 +171,7 @@ public class SettingsManager {
 
 	public void reloadSystem() {
 		system = YamlConfiguration.loadConfiguration(f2);
-		if(system.getInt("version", 0) != SYSTEM_VERSION){
+		if (system.getInt("version", 0) != SYSTEM_VERSION) {
 			moveFile(f2);
 			reloadSystem();
 		}
@@ -184,18 +181,17 @@ public class SettingsManager {
 
 	public void reloadKits() {
 		kits = YamlConfiguration.loadConfiguration(f3);
-		if(kits.getInt("version", 0) != KIT_VERSION){
+		if (kits.getInt("version", 0) != KIT_VERSION) {
 			moveFile(f3);
 			loadFile("kits.yml");
 			reloadKits();
 		}
 
 	}
-	
-	
+
 	public void reloadMessages() {
 		messages = YamlConfiguration.loadConfiguration(f4);
-		if(messages.getInt("version", 0) != MESSAGE_VERSION){
+		if (messages.getInt("version", 0) != MESSAGE_VERSION) {
 			moveFile(f4);
 			loadFile("messages.yml");
 			reloadKits();
@@ -203,19 +199,15 @@ public class SettingsManager {
 		messages.set("version", MESSAGE_VERSION);
 		saveMessages();
 	}
-	
+
 	public void reloadChest() {
 		chest = YamlConfiguration.loadConfiguration(f5);
-		if(chest.getInt("version", 0) != CHEST_VERSION){
+		if (chest.getInt("version", 0) != CHEST_VERSION) {
 			moveFile(f5);
 			loadFile("chest.yml");
 			reloadKits();
 		}
 	}
-
-
-
-
 
 	public void saveSystemConfig() {
 		try {
@@ -252,7 +244,7 @@ public class SettingsManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void saveChest() {
 		try {
 			chest.save(f5);
@@ -266,11 +258,9 @@ public class SettingsManager {
 		return spawns.getInt("spawns." + gameid + ".count");
 	}
 
-
-
-	//TODO: Implement per-arena settings aka flags
-	public HashMap < String, Object > getGameFlags(int a) {
-		HashMap < String, Object > flags = new HashMap < String, Object > ();
+	// TODO: Implement per-arena settings aka flags
+	public HashMap<String, Object> getGameFlags(int a) {
+		HashMap<String, Object> flags = new HashMap<String, Object>();
 
 		flags.put("AUTOSTART_PLAYERS", system.getInt("sg-system.arenas." + a + ".flags.autostart"));
 		flags.put("AUTOSTART_VOTE", system.getInt("sg-system.arenas." + a + ".flags.vote"));
@@ -291,7 +281,8 @@ public class SettingsManager {
 		return flags;
 
 	}
-	public void saveGameFlags(HashMap < String, Object > flags, int a) {
+
+	public void saveGameFlags(HashMap<String, Object> flags, int a) {
 
 		system.set("sg-system.arenas." + a + ".flags.autostart", flags.get("AUTOSTART_PLAYERS"));
 		system.set("sg-system.arenas." + a + ".flags.vote", flags.get("AUTOSTART_VOTE"));
@@ -314,27 +305,17 @@ public class SettingsManager {
 	}
 
 	public Location getLobbySpawn() {
-		try{
-			return new Location(Bukkit.getWorld(system.getString("sg-system.lobby.spawn.world")),
-				system.getInt("sg-system.lobby.spawn.x"),
-				system.getInt("sg-system.lobby.spawn.y"),
-				system.getInt("sg-system.lobby.spawn.z"),
-				system.getInt("sg-system.lobby.spawn.yaw"),
-				system.getInt("sg-system.lobby.spawn.pitch"));
-		}catch(Exception e){
+		try {
+			return new Location(Bukkit.getWorld(system.getString("sg-system.lobby.spawn.world")), system.getInt("sg-system.lobby.spawn.x"), system.getInt("sg-system.lobby.spawn.y"), system.getInt("sg-system.lobby.spawn.z"), system.getInt("sg-system.lobby.spawn.yaw"), system.getInt("sg-system.lobby.spawn.pitch"));
+		} catch (Exception e) {
 			return null;
 		}
 	}
 
 	public Location getSpawnPoint(int gameid, int spawnid) {
-		return new Location(getGameWorld(gameid),
-				spawns.getInt("spawns." + gameid + "." + spawnid + ".x"),
-				spawns.getInt("spawns." + gameid + "." + spawnid + ".y"),
-				spawns.getInt("spawns." + gameid + "." + spawnid + ".z"),
-				(float)spawns.getDouble("spawns." + gameid + "." + spawnid + ".yaw"),
-				(float)spawns.getDouble("spawns." + gameid + "." + spawnid + ".pitch"));
+		return new Location(getGameWorld(gameid), spawns.getInt("spawns." + gameid + "." + spawnid + ".x"), spawns.getInt("spawns." + gameid + "." + spawnid + ".y"), spawns.getInt("spawns." + gameid + "." + spawnid + ".z"), (float) spawns.getDouble("spawns." + gameid + "." + spawnid + ".yaw"), (float) spawns.getDouble("spawns." + gameid + "." + spawnid + ".pitch"));
 	}
-	
+
 	public void setLobbySpawn(Location l) {
 		system.set("sg-system.lobby.spawn.world", l.getWorld().getName());
 		system.set("sg-system.lobby.spawn.x", l.getBlockX());
@@ -344,7 +325,6 @@ public class SettingsManager {
 		system.set("sg-system.lobby.spawn.pitch", l.getPitch());
 
 	}
-
 
 	public void setSpawn(int gameid, int spawnid, Location v) {
 		spawns.set("spawns." + gameid + "." + spawnid + ".x", v.getBlockX());
@@ -370,31 +350,30 @@ public class SettingsManager {
 		return getInstance().getConfig().getString("sql.prefix");
 	}
 
-
-	public void loadFile(String file){
+	public void loadFile(String file) {
 		File t = new File(p.getDataFolder(), file);
-		System.out.println("Writing new file: "+ t.getAbsolutePath());
-			
-			try {
-				t.createNewFile();
-				FileWriter out = new FileWriter(t);
-				System.out.println(file);
-				InputStream is = getClass().getResourceAsStream("/"+file);
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-				String line;
-				while ((line = br.readLine()) != null) {
-					out.write(line+"\n");
-					System.out.println(line);
-				}
-				out.flush();
-				is.close();
-				isr.close();
-				br.close();
-				out.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+		System.out.println("Writing new file: " + t.getAbsolutePath());
+
+		try {
+			t.createNewFile();
+			FileWriter out = new FileWriter(t);
+			System.out.println(file);
+			InputStream is = getClass().getResourceAsStream("/" + file);
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			String line;
+			while ((line = br.readLine()) != null) {
+				out.write(line + "\n");
+				System.out.println(line);
 			}
-		
+			out.flush();
+			is.close();
+			isr.close();
+			br.close();
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
