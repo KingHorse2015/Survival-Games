@@ -41,7 +41,7 @@ public class PlayerJoinArenaEvent extends Event implements Cancellable {
 	}
 
 	@Override
-	public void setCancelled(boolean arg0) {
-		cancelled = arg0;
+	public void setCancelled(boolean cancel) {
+		cancelled = cancel;
 	}
 }
