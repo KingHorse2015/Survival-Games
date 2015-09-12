@@ -14,9 +14,6 @@ public class ListArenas implements SubCommand {
 	public boolean onCommand(Player player, String[] args) {
 		StringBuilder arenas = new StringBuilder();
 		try {
-			if (args.length == 0 || Integer.parseInt(args[0]) < 0 || Integer.parseInt(args[0]) > GameManager.getInstance().getGameCount()) {
-				MessageManager.getInstance().sendMessage(PrefixType.ERROR, "error.gamenoexist", player);
-			}
 			if (GameManager.getInstance().getGames().isEmpty()) {
 				arenas.append(SettingsManager.getInstance().getMessageConfig().getString("messages.words.noarenas", "No arenas")).append(": ");
 				player.sendMessage(ChatColor.RED + arenas.toString());
@@ -28,7 +25,7 @@ public class ListArenas implements SubCommand {
 			}
 			player.sendMessage(ChatColor.GREEN + arenas.toString());
 		} catch (Exception e) {
-			MessageManager.getInstance().sendMessage(PrefixType.ERROR, "error.gamenoexist", player);
+			MessageManager.getInstance().sendFMessage(PrefixType.ERROR, "error.gamenotexist", player);
 		}
 		return false;
 	}
