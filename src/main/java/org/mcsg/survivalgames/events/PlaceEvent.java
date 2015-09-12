@@ -46,10 +46,8 @@ public class PlaceEvent implements Listener {
 			return;
 
 		}
-
 		if (!allowedPlace.contains(event.getBlock().getTypeId())) {
 			event.setCancelled(true);
 		}
-
 	}
 }
