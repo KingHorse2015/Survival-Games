@@ -74,7 +74,8 @@ public class SurvivalGames extends JavaPlugin {
 			"Lexonia",
 			"ChaskyT",
 			"Anon232",
-			"IngeniousGamer" // :) -Bryce
+			"IngeniousGamer", // :) -Bryce
+			"Pocketkid2"
 	});
 
 	SurvivalGames p = this;
@@ -199,13 +200,8 @@ public class SurvivalGames extends JavaPlugin {
 		logger.log(l, msg);
 	}
 
-	public static void debug(String msg) {
+	public static void debug(Object obj) {
 		if (SettingsManager.getInstance().getConfig().getBoolean("debug", false))
-			$("[Debug] " + msg);
-	}
-
-	public static void debug(int a) {
-		if (SettingsManager.getInstance().getConfig().getBoolean("debug", false))
-			debug(a + "");
+			logger.info("[Debug] " + obj);
 	}
 }
