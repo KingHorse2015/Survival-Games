@@ -1,0 +1,4 @@
+# Configure java version for CircleCI
+machine:
+    java:
+        version: oraclejdk8
