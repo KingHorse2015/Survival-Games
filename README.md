@@ -5,3 +5,7 @@ I have been a fan of the original SurvivalGames plugin. I decided to fork it bec
 Development status: Testing
 ---------------------------
 I've just started working on this, but won't be able to perfectly test everything because I don't have a big server and whatnot. If you use this plugin and would like to help report bugs please do so by using the github releases build.
+
+Development builds: CircleCI
+----------------------------
+Go [here](https://circleci.com/gh/Pocketkid2/Survival-Games), click on the latest successful build, and click on the artifacts tab. There you will find the SurvivalGames.jar
