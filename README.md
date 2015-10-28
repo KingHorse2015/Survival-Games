@@ -6,6 +6,6 @@ Development status: Accepting Work
 ---------------------------
 I need suggestions on what parts to focus on. Put them in the issue tracker and I will label them as enhancements. As always, bugs of any sort should be reported with any info possible.
 
-Development builds: CircleCI
+Development builds: CircleCI [![Circle CI](https://circleci.com/gh/Pocketkid2/Survival-Games.svg?style=svg)](https://circleci.com/gh/Pocketkid2/Survival-Games)
 ----------------------------
-Go [here](https://circleci.com/gh/Pocketkid2/Survival-Games), click on the latest successful build, and click on the artifacts tab. There you will find the SurvivalGames.jar
+Click [here](https://circleci.com/gh/Pocketkid2/Survival-Games) or on the button above, click on the latest successful build, and click on the artifacts tab. There you will find the SurvivalGames.jar
