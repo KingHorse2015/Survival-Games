@@ -2,6 +2,9 @@ Update: (11/26/15)
 ------------------
 I will be closing down this, and all my other bukkit/spigot projects, in favor of Sponge development, in the coming weeks. I will probably work on a Sponge version of this if enough people care for one. Thanks!
 
+Update: (8/8/16)
+----------------
+I'll probably still maintain it, but don't expect any major changes/features on this project.
 
 
 Survival Games (Fork maintained by Pocketkid2)
