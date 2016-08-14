@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ public class Game {
 	private GameMode mode = GameMode.DISABLED;
 	private ArrayList<Player> activePlayers = new ArrayList<Player>();
 	private ArrayList<Player> inactivePlayers = new ArrayList<Player>();
-	private ArrayList<String> spectators = new ArrayList<String>();
+	private ArrayList<Player> spectators = new ArrayList<Player>();
 	private ArrayList<Player> queue = new ArrayList<Player>();
 	private HashMap<String, Object> flags = new HashMap<String, Object>();
 	HashMap<Player, Integer> nextspec = new HashMap<Player, Integer>();
@@ -89,9 +90,11 @@ public class Game {
 		int y1 = system.getInt("sg-system.arenas." + gameID + ".y2");
 		int z1 = system.getInt("sg-system.arenas." + gameID + ".z2");
 		$(x1 + " " + y1 + " " + z1);
-		Location max = new Location(SettingsManager.getGameWorld(gameID), Math.max(x, x1), Math.max(y, y1), Math.max(z, z1));
+		Location max = new Location(SettingsManager.getGameWorld(gameID), Math.max(x, x1), Math.max(y, y1),
+				Math.max(z, z1));
 		$(max.toString());
-		Location min = new Location(SettingsManager.getGameWorld(gameID), Math.min(x, x1), Math.min(y, y1), Math.min(z, z1));
+		Location min = new Location(SettingsManager.getGameWorld(gameID), Math.min(x, x1), Math.min(y, y1),
+				Math.min(z, z1));
 		$(min.toString());
 
 		arena = new Arena(min, max);
@@ -138,14 +141,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * ENABLE
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 
 	public void enable() {
@@ -154,7 +157,8 @@ public class Game {
 			MessageManager.getInstance().broadcastFMessage(PrefixType.INFO, "broadcast.gameenabled", "arena-" + gameID);
 		}
 		disabled = false;
-		int b = (SettingsManager.getInstance().getSpawnCount(gameID) > queue.size()) ? queue.size() : SettingsManager.getInstance().getSpawnCount(gameID);
+		int b = (SettingsManager.getInstance().getSpawnCount(gameID) > queue.size()) ? queue.size()
+				: SettingsManager.getInstance().getSpawnCount(gameID);
 		for (int a = 0; a < b; a++) {
 			addPlayer(queue.remove(0));
 		}
@@ -171,14 +175,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * ADD PLAYER
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 
 	public boolean addPlayer(Player p) {
@@ -191,7 +195,8 @@ public class Game {
 			msgmgr.sendFMessage(PrefixType.WARNING, "game.nopermission", p, "arena-" + gameID);
 			return false;
 		}
-		HookManager.getInstance().runHook("GAME_PRE_ADDPLAYER", "arena-" + gameID, "player-" + p.getName(), "maxplayers-" + spawns.size(), "players-" + activePlayers.size());
+		HookManager.getInstance().runHook("GAME_PRE_ADDPLAYER", "arena-" + gameID, "player-" + p.getName(),
+				"maxplayers-" + spawns.size(), "players-" + activePlayers.size());
 
 		GameManager.getInstance().removeFromOtherQueues(p, gameID);
 
@@ -204,15 +209,17 @@ public class Game {
 		if (p.isInsideVehicle()) {
 			p.leaveVehicle();
 		}
-		if (spectators.contains(p))
+		if (spectators.contains(p)) {
 			removeSpectator(p);
-		if (mode == GameMode.WAITING || mode == GameMode.STARTING) {
+		}
+		if ((mode == GameMode.WAITING) || (mode == GameMode.STARTING)) {
 			if (activePlayers.size() < SettingsManager.getInstance().getSpawnCount(gameID)) {
 				msgmgr.sendMessage(PrefixType.INFO, "Joining Arena " + gameID, p);
 				PlayerJoinArenaEvent joinarena = new PlayerJoinArenaEvent(p, GameManager.getInstance().getGame(gameID));
 				Bukkit.getServer().getPluginManager().callEvent(joinarena);
-				if (joinarena.isCancelled())
+				if (joinarena.isCancelled()) {
 					return false;
+				}
 				boolean placed = false;
 				int spawnCount = SettingsManager.getInstance().getSpawnCount(gameID);
 
@@ -229,6 +236,7 @@ public class Game {
 
 						p.setHealth(p.getMaxHealth());
 						p.setFoodLevel(20);
+						p.setExp(0);
 						clearInv(p);
 
 						activePlayers.add(p);
@@ -237,7 +245,8 @@ public class Game {
 						hookvars.put("activeplayers", activePlayers.size() + "");
 						LobbyManager.getInstance().updateWall(gameID);
 						showMenu(p);
-						HookManager.getInstance().runHook("GAME_POST_ADDPLAYER", "activePlayers-" + activePlayers.size());
+						HookManager.getInstance().runHook("GAME_POST_ADDPLAYER",
+								"activePlayers-" + activePlayers.size());
 
 						if (spawnCount == activePlayers.size()) {
 							countdown(5);
@@ -257,9 +266,12 @@ public class Game {
 				msgmgr.sendFMessage(PrefixType.WARNING, "error.gamefull", p, "arena-" + gameID);
 				return false;
 			}
-			msgFall(PrefixType.INFO, "game.playerjoingame", "player-" + p.getName(), "activeplayers-" + getActivePlayers(), "maxplayers-" + SettingsManager.getInstance().getSpawnCount(gameID));
-			if (activePlayers.size() >= config.getInt("auto-start-players") && !countdownRunning)
+			msgFall(PrefixType.INFO, "game.playerjoingame", "player-" + p.getName(),
+					"activeplayers-" + getActivePlayers(),
+					"maxplayers-" + SettingsManager.getInstance().getSpawnCount(gameID));
+			if ((activePlayers.size() >= config.getInt("auto-start-players")) && !countdownRunning) {
 				countdown(config.getInt("auto-start-time"));
+			}
 			return true;
 		} else {
 			if (config.getBoolean("enable-player-queue")) {
@@ -277,14 +289,15 @@ public class Game {
 				}
 			}
 		}
-		if (mode == GameMode.INGAME)
+		if (mode == GameMode.INGAME) {
 			msgmgr.sendFMessage(PrefixType.WARNING, "error.alreadyingame", p);
-		else if (mode == GameMode.DISABLED)
+		} else if (mode == GameMode.DISABLED) {
 			msgmgr.sendFMessage(PrefixType.WARNING, "error.gamedisabled", p, "arena-" + gameID);
-		else if (mode == GameMode.RESETING)
+		} else if (mode == GameMode.RESETING) {
 			msgmgr.sendFMessage(PrefixType.WARNING, "error.gamereseting", p);
-		else
+		} else {
 			msgmgr.sendMessage(PrefixType.INFO, "Cannot join game!", p);
+		}
 		LobbyManager.getInstance().updateWall(gameID);
 		return false;
 	}
@@ -298,7 +311,7 @@ public class Game {
 
 		ArrayList<Kit> kits = GameManager.getInstance().getKits(p);
 		SurvivalGames.debug(kits + "");
-		if (kits == null || kits.size() == 0 || !SettingsManager.getInstance().getKits().getBoolean("enabled")) {
+		if ((kits == null) || (kits.size() == 0) || !SettingsManager.getInstance().getKits().getBoolean("enabled")) {
 			GameManager.getInstance().leaveKitMenu(p);
 			return;
 		}
@@ -333,14 +346,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * VOTE
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 
 	ArrayList<Player> voted = new ArrayList<Player>();
@@ -373,7 +386,8 @@ public class Game {
 		// Bukkit.getServer().broadcastPrefixType((vote +0.0) /
 		// (getActivePlayers() +0.0) +"% voted, needs
 		// "+(c.getInt("auto-start-vote")+0.0)/100);
-		if ((((vote + 0.0) / (getActivePlayers() + 0.0)) >= (config.getInt("auto-start-vote") + 0.0) / 100) && getActivePlayers() > 1) {
+		if ((((vote + 0.0) / (getActivePlayers() + 0.0)) >= ((config.getInt("auto-start-vote") + 0.0) / 100))
+				&& (getActivePlayers() > 1)) {
 			countdown(config.getInt("auto-start-time"));
 			for (Player p : activePlayers) {
 				// p.sendMessage(ChatColor.LIGHT_PURPLE + "Game Starting in " +
@@ -384,14 +398,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * START GAME
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public void startGame() {
 		if (mode == GameMode.INGAME) {
@@ -416,23 +430,23 @@ public class Game {
 			if (config.getBoolean("restock-chest")) {
 				SettingsManager.getGameWorld(gameID).setTime(0);
 				gcount++;
-				tasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(), new NightChecker(), 14400));
+				tasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(),
+						new NightChecker(), 14400));
 			}
 			if (config.getInt("grace-period") != 0) {
 				for (Player play : activePlayers) {
-					msgmgr.sendMessage(PrefixType.INFO, "You have a " + config.getInt("grace-period") + " second grace period!", play);
+					msgmgr.sendMessage(PrefixType.INFO,
+							"You have a " + config.getInt("grace-period") + " second grace period!", play);
 				}
-				Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(), new Runnable() {
-					@Override
-					public void run() {
-						for (Player play : activePlayers) {
-							msgmgr.sendMessage(PrefixType.INFO, "Grace period has ended!", play);
-						}
+				Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(), () -> {
+					for (Player play : activePlayers) {
+						msgmgr.sendMessage(PrefixType.INFO, "Grace period has ended!", play);
 					}
 				}, config.getInt("grace-period") * 20);
 			}
 			if (config.getBoolean("deathmatch.enabled")) {
-				tasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(), new DeathMatch(), config.getInt("deathmatch.time") * 20 * 60));
+				tasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(),
+						new DeathMatch(), config.getInt("deathmatch.time") * 20 * 60));
 			}
 		}
 
@@ -443,14 +457,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * COUNTDOWN
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public int getCountdownTime() {
 		return count;
@@ -461,31 +475,29 @@ public class Game {
 
 	public void countdown(int time) {
 		// Bukkit.broadcastMessage(""+time);
-		MessageManager.getInstance().broadcastFMessage(PrefixType.INFO, "broadcast.gamestarting", "arena-" + gameID, "t-" + time);
+		MessageManager.getInstance().broadcastFMessage(PrefixType.INFO, "broadcast.gamestarting", "arena-" + gameID,
+				"t-" + time);
 		countdownRunning = true;
 		count = time;
 		Bukkit.getScheduler().cancelTask(tid);
 
-		if (mode == GameMode.WAITING || mode == GameMode.STARTING) {
+		if ((mode == GameMode.WAITING) || (mode == GameMode.STARTING)) {
 			mode = GameMode.STARTING;
-			tid = Bukkit.getScheduler().scheduleSyncRepeatingTask(GameManager.getInstance().getPlugin(), new Runnable() {
-				@Override
-				public void run() {
-					if (count > 0) {
-						if (count % 10 == 0) {
-							msgFall(PrefixType.INFO, "game.countdown", "t-" + count);
-						}
-						if (count < 6) {
-							msgFall(PrefixType.INFO, "game.countdown", "t-" + count);
-
-						}
-						count--;
-						LobbyManager.getInstance().updateWall(gameID);
-					} else {
-						startGame();
-						Bukkit.getScheduler().cancelTask(tid);
-						countdownRunning = false;
+			tid = Bukkit.getScheduler().scheduleSyncRepeatingTask(GameManager.getInstance().getPlugin(), () -> {
+				if (count > 0) {
+					if ((count % 10) == 0) {
+						msgFall(PrefixType.INFO, "game.countdown", "t-" + count);
 					}
+					if (count < 6) {
+						msgFall(PrefixType.INFO, "game.countdown", "t-" + count);
+
+					}
+					count--;
+					LobbyManager.getInstance().updateWall(gameID);
+				} else {
+					startGame();
+					Bukkit.getScheduler().cancelTask(tid);
+					countdownRunning = false;
 				}
 			}, 0, 20);
 
@@ -493,14 +505,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * REMOVE PLAYER
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 
 	public void removePlayer(Player p, boolean b) {
@@ -516,8 +528,9 @@ public class Game {
 			activePlayers.remove(p);
 			inactivePlayers.remove(p);
 			for (Object in : spawns.keySet().toArray()) {
-				if (spawns.get(in) == p)
+				if (spawns.get(in) == p) {
 					spawns.remove(in);
+				}
 			}
 			LobbyManager.getInstance().clearSigns(gameID);
 		}
@@ -535,14 +548,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * KILL PLAYER
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public void killPlayer(Player p, boolean left) {
 		try {
@@ -552,10 +565,11 @@ public class Game {
 			}
 			sm.playerDied(p, activePlayers.size(), gameID, new Date().getTime() - startTime);
 
-			if (!activePlayers.contains(p))
+			if (!activePlayers.contains(p)) {
 				return;
-			else
+			} else {
 				restoreInv(p);
+			}
 
 			activePlayers.remove(p);
 			inactivePlayers.add(p);
@@ -563,23 +577,41 @@ public class Game {
 			if (left) {
 				msgFall(PrefixType.INFO, "game.playerleavegame", "player-" + p.getName());
 			} else {
-				if (mode != GameMode.WAITING && p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null) {
+				if ((mode != GameMode.WAITING) && (p.getLastDamageCause() != null)
+						&& (p.getLastDamageCause().getCause() != null)) {
 					switch (p.getLastDamageCause().getCause()) {
 					case ENTITY_ATTACK:
 						if (p.getLastDamageCause().getEntityType() == EntityType.PLAYER) {
 							Player killer = p.getKiller();
-							msgFall(PrefixType.INFO, "death." + p.getLastDamageCause().getEntityType(), "player-" + (SurvivalGames.auth.contains(p.getName()) ? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + p.getName(), "killer-" + ((killer != null) ? (SurvivalGames.auth.contains(killer.getName()) ? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + killer.getName() : "Unknown"), "item-" + ((killer != null) ? ItemReader.getFriendlyItemName(killer.getItemInHand().getType()) : "Unknown Item"));
-							if (killer != null && p != null)
+							msgFall(PrefixType.INFO, "death." + p.getLastDamageCause().getEntityType(),
+									"player-" + (SurvivalGames.devs.contains(p.getName())
+											? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + p.getName(),
+									"killer-" + ((killer != null)
+											? (SurvivalGames.devs.contains(killer.getName())
+													? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + killer.getName()
+											: "Unknown"),
+									"item-" + ((killer != null)
+											? ItemReader.getFriendlyItemName(
+													killer.getInventory().getItemInMainHand().getType())
+											: "Unknown Item"));
+							if ((killer != null) && (p != null)) {
 								sm.addKill(killer, p, gameID);
+							}
 							pk = new PlayerKilledEvent(p, this, killer, p.getLastDamageCause().getCause());
 						} else {
-							msgFall(PrefixType.INFO, "death." + p.getLastDamageCause().getEntityType(), "player-" + (SurvivalGames.auth.contains(p.getName()) ? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + p.getName(), "killer-" + p.getLastDamageCause().getEntityType());
+							msgFall(PrefixType.INFO, "death." + p.getLastDamageCause().getEntityType(),
+									"player-" + (SurvivalGames.devs.contains(p.getName())
+											? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + p.getName(),
+									"killer-" + p.getLastDamageCause().getEntityType());
 							pk = new PlayerKilledEvent(p, this, null, p.getLastDamageCause().getCause());
 
 						}
 						break;
 					default:
-						msgFall(PrefixType.INFO, "death." + p.getLastDamageCause().getCause().name(), "player-" + (SurvivalGames.auth.contains(p.getName()) ? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + p.getName(), "killer-" + p.getLastDamageCause().getCause());
+						msgFall(PrefixType.INFO, "death." + p.getLastDamageCause().getCause().name(),
+								"player-" + (SurvivalGames.devs.contains(p.getName())
+										? ChatColor.DARK_RED + "" + ChatColor.BOLD : "") + p.getName(),
+								"killer-" + p.getLastDamageCause().getCause());
 						pk = new PlayerKilledEvent(p, this, null, p.getLastDamageCause().getCause());
 
 						break;
@@ -588,7 +620,8 @@ public class Game {
 
 					if (getActivePlayers() > 1) {
 						for (Player pl : getAllPlayers()) {
-							msgmgr.sendMessage(PrefixType.INFO, ChatColor.DARK_AQUA + "There are " + ChatColor.YELLOW + "" + getActivePlayers() + ChatColor.DARK_AQUA + " players remaining!", pl);
+							msgmgr.sendMessage(PrefixType.INFO, ChatColor.DARK_AQUA + "There are " + ChatColor.YELLOW
+									+ "" + getActivePlayers() + ChatColor.DARK_AQUA + " players remaining!", pl);
 						}
 					}
 				}
@@ -601,12 +634,14 @@ public class Game {
 				l.getWorld().strikeLightningEffect(l);
 			}
 
-			if (getActivePlayers() <= config.getInt("endgame.players") && config.getBoolean("endgame.fire-lighting.enabled") && !endgameRunning) {
+			if ((getActivePlayers() <= config.getInt("endgame.players"))
+					&& config.getBoolean("endgame.fire-lighting.enabled") && !endgameRunning) {
 
-				tasks.add(Bukkit.getScheduler().scheduleSyncRepeatingTask(GameManager.getInstance().getPlugin(), new EndgameManager(), 0, config.getInt("endgame.fire-lighting.interval") * 20));
+				tasks.add(Bukkit.getScheduler().scheduleSyncRepeatingTask(GameManager.getInstance().getPlugin(),
+						new EndgameManager(), 0, config.getInt("endgame.fire-lighting.interval") * 20));
 			}
 
-			if (activePlayers.size() < 2 && mode != GameMode.WAITING) {
+			if ((activePlayers.size() < 2) && (mode != GameMode.WAITING)) {
 				playerWin(p);
 				endGame();
 			}
@@ -625,29 +660,26 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * PLAYER WIN
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public void playerWin(Player p) {
-		if (GameMode.DISABLED == mode)
+		if (GameMode.DISABLED == mode) {
 			return;
+		}
 		Player win = activePlayers.get(0);
 		// clearInv(p);
 		win.teleport(SettingsManager.getInstance().getLobbySpawn());
 		restoreInv(win);
-		msgmgr.broadcastFMessage(PrefixType.INFO, "game.playerwin", "arena-" + gameID, "victim-" + p.getName(), "player-" + win.getName());
-		LobbyManager.getInstance().display(new String[] {
-				win.getName(),
-				"",
-				"Won the ",
-				"Survival Games!"
-		}, gameID);
+		msgmgr.broadcastFMessage(PrefixType.INFO, "game.playerwin", "arena-" + gameID, "victim-" + p.getName(),
+				"player-" + win.getName());
+		LobbyManager.getInstance().display(new String[] { win.getName(), "", "Won the ", "Survival Games!" }, gameID);
 
 		mode = GameMode.FINISHING;
 
@@ -679,14 +711,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * DISABLE
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public void disable() {
 		disabled = true;
@@ -723,14 +755,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * RESET
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public void resetArena() {
 
@@ -755,8 +787,9 @@ public class Game {
 	public void resetCallback() {
 		if (!disabled) {
 			enable();
-		} else
+		} else {
 			mode = GameMode.DISABLED;
+		}
 		LobbyManager.getInstance().updateWall(gameID);
 	}
 
@@ -775,14 +808,14 @@ public class Game {
 	}
 
 	/*
-	 * 
+	 *
 	 * ################################################
-	 * 
+	 *
 	 * SPECTATOR
-	 * 
+	 *
 	 * ################################################
-	 * 
-	 * 
+	 *
+	 *
 	 */
 
 	public void addSpectator(Player p) {
@@ -803,9 +836,16 @@ public class Game {
 
 		p.setAllowFlight(true);
 		p.setFlying(true);
-		spectators.add(p.getName());
-		msgmgr.sendMessage(PrefixType.INFO, "You are now spectating! Use /sg spectate again to return to the lobby.", p);
-		msgmgr.sendMessage(PrefixType.INFO, "Right click while holding shift to teleport to the next ingame player, left click to go back.", p);
+		ItemStack item = new ItemStack(Material.BARRIER,1);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(ChatColor.YELLOW + "Right Click to Leave!");
+		item.setItemMeta(meta);
+		p.getInventory().addItem(item);
+		spectators.add(p);
+		msgmgr.sendMessage(PrefixType.INFO, "You are now spectating! Use /sg spectate again to return to the lobby.",
+				p);
+		msgmgr.sendMessage(PrefixType.INFO,
+				"Right click while holding shift to teleport to the next ingame player, left click to go back.", p);
 		nextspec.put(p, 0);
 	}
 
@@ -838,7 +878,7 @@ public class Game {
 	public void clearSpecs() {
 
 		for (int a = 0; a < spectators.size(); a = 0) {
-			removeSpectator(Bukkit.getPlayerExact(spectators.get(0)));
+			removeSpectator(spectators.get(0));
 		}
 		spectators.clear();
 		nextspec.clear();
@@ -920,12 +960,9 @@ public class Game {
 					}
 				}
 			}
-			tasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(), new Runnable() {
-				@Override
-				public void run() {
-					for (Player p : activePlayers) {
-						p.getLocation().getWorld().strikeLightning(p.getLocation());
-					}
+			tasks.add(Bukkit.getScheduler().scheduleSyncDelayedTask(GameManager.getInstance().getPlugin(), () -> {
+				for (Player p : activePlayers) {
+					p.getLocation().getWorld().strikeLightning(p.getLocation());
 				}
 			}, config.getInt("deathmatch.killtime") * 20 * 60));
 		}
@@ -939,8 +976,9 @@ public class Game {
 		long t = startTime / 1000;
 		long l = config.getLong("grace-period");
 		long d = new Date().getTime() / 1000;
-		if ((d - t) < l)
+		if ((d - t) < l) {
 			return true;
+		}
 		return false;
 	}
 
@@ -957,10 +995,7 @@ public class Game {
 	}
 
 	public Player[][] getPlayers() {
-		return new Player[][] {
-				activePlayers.toArray(new Player[0]),
-				inactivePlayers.toArray(new Player[0])
-		};
+		return new Player[][] { activePlayers.toArray(new Player[0]), inactivePlayers.toArray(new Player[0]) };
 	}
 
 	public ArrayList<Player> getAllPlayers() {
@@ -1022,14 +1057,14 @@ public class Game {
 
 	/*
 	 * public void randomTrap() {
-	 * 
+	 *
 	 * World world = SettingsManager.getGameWorld(gameID);
-	 * 
+	 *
 	 * double xcord; double zcord; double ycord = 80; Random rand = new
 	 * Random(); xcord = rand.nextInt(1000); zcord = rand.nextInt(1000);
 	 * Location trap = new Location(world, xcord, ycord, zcord); boolean isAir =
 	 * true;
-	 * 
+	 *
 	 * while(isAir == true) { ycord--; Byte blockData =
 	 * trap.getBlock().getData(); if(blockData != 0) {
 	 * trap.getBlock().setType(Material.AIR); ycord--;
@@ -1037,7 +1072,7 @@ public class Game {
 	 * trap.getBlock().setType(Material.AIR); ycord--;
 	 * trap.getBlock().setType(Material.LAVA); isAir = false; } else { isAir =
 	 * true; } }
-	 * 
+	 *
 	 * }
 	 */
 }
